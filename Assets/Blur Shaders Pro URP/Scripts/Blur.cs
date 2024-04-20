@@ -20,7 +20,7 @@
             {
                 this.material = material;
 
-                profilerTag = "Blur";
+                profilerTag = "Blur"; 
                 settings = VolumeManager.instance.stack.GetComponent<BlurSettings>();
                 renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
             }

@@ -11,7 +11,7 @@
         public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
 
         [Tooltip("Blur Strength")]
-        public ClampedIntParameter strength = new ClampedIntParameter(5, 1, 500);
+        public ClampedIntParameter strength = new ClampedIntParameter(1, 1, 500);
 
         [Tooltip("Type of blur. Gaussian blur is slightly more expensive, but higher fidelity.")]
         public BlurTypeParameter blurType = new BlurTypeParameter(BlurType.Gaussian);
