@@ -16,7 +16,10 @@ MonoBehaviour:
   renderPassEvent: 600
   strength:
     m_OverrideState: 1
-    m_Value: 101
+    m_Value: 40
+  blurType:
+    m_OverrideState: 1
+    m_Value: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0

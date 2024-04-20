@@ -14,11 +14,13 @@
     public class BlurEditor : VolumeComponentEditor
     {
         SerializedDataParameter strength;
+        SerializedDataParameter blurType;
 
         public override void OnEnable()
         {
             var o = new PropertyFetcher<BlurSettings>(serializedObject);
             strength = Unpack(o.Find(x => x.strength));
+            blurType = Unpack(o.Find(x => x.blurType));
         }
 
         public override void OnInspectorGUI()
@@ -33,6 +35,7 @@
             }
 
             PropertyField(strength);
+            PropertyField(blurType);
         }
 
 #if UNITY_2021_2_OR_NEWER

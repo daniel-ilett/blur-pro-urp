@@ -31,7 +31,7 @@
 
         Pass
         {
-			Name "Horizontal"
+			Name "HorizontalGaussian"
 
             HLSLPROGRAM
             #pragma vertex Vert
@@ -64,7 +64,7 @@
 
 		Pass
         {
-			Name "Vertical"
+			Name "VerticalGaussian"
 
             HLSLPROGRAM
             #pragma vertex Vert
@@ -86,6 +86,69 @@
 					kernelSum += gauss;
 					uv = i.texcoord + float2(0.0f, _BlitTexture_TexelSize.y * y);
 					col += gauss * SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, uv).xyz;
+				}
+
+				col /= kernelSum;
+				return float4(col, 1.0f);
+			}
+            ENDHLSL
+        }
+
+		Pass
+        {
+			Name "HorizontalBox"
+
+            HLSLPROGRAM
+            #pragma vertex Vert
+            #pragma fragment frag_horizontal
+
+            float4 frag_horizontal (Varyings i) : SV_Target
+			{
+				float3 col = float3(0.0f, 0.0f, 0.0f);
+				float kernelSum = 0.0f;
+
+				int upper = ((_KernelSize - 1) / 2);
+				int lower = -upper;
+
+				float2 uv;
+
+				for (int x = lower; x <= upper; ++x)
+				{
+					kernelSum++;
+					uv = i.texcoord + float2(_BlitTexture_TexelSize.x * x, 0.0f);
+					col += SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, uv).xyz;
+				}
+
+				col /= kernelSum;
+
+				return float4(col, 1.0f);
+			}
+            ENDHLSL
+        }
+
+		Pass
+        {
+			Name "VerticalBox"
+
+            HLSLPROGRAM
+            #pragma vertex Vert
+            #pragma fragment frag_vertical
+
+            float4 frag_vertical (Varyings i) : SV_Target
+			{
+				float3 col = float3(0.0f, 0.0f, 0.0f);
+				float kernelSum = 0.0f;
+
+				int upper = ((_KernelSize - 1) / 2);
+				int lower = -upper;
+
+				float2 uv;
+
+				for (int y = lower; y <= upper; ++y)
+				{
+					kernelSum++;
+					uv = i.texcoord + float2(0.0f, _BlitTexture_TexelSize.y * y);
+					col += SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, uv).xyz;
 				}
 
 				col /= kernelSum;

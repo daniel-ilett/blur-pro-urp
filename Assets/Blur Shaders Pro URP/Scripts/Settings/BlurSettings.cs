@@ -1,5 +1,6 @@
 ﻿namespace BlurShadersPro.URP
 {
+    using System;
     using UnityEngine;
     using UnityEngine.Rendering;
     using UnityEngine.Rendering.Universal;
@@ -10,7 +11,10 @@
         public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
 
         [Tooltip("Blur Strength")]
-        public ClampedIntParameter strength = new ClampedIntParameter(5, 1, 101);
+        public ClampedIntParameter strength = new ClampedIntParameter(5, 1, 500);
+
+        [Tooltip("Type of blur. Gaussian blur is slightly more expensive, but higher fidelity.")]
+        public BlurTypeParameter blurType = new BlurTypeParameter(BlurType.Gaussian);
 
         public bool IsActive()
         {
@@ -21,5 +25,17 @@
         {
             return false;
         }
+    }
+
+    [Serializable]
+    public enum BlurType
+    {
+        Gaussian, Box
+    }
+
+    [Serializable]
+    public sealed class BlurTypeParameter : VolumeParameter<BlurType>
+    {
+        public BlurTypeParameter(BlurType value, bool overrideState = false) : base(value, overrideState) { }
     }
 }

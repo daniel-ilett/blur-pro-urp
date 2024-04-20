@@ -66,8 +66,16 @@
                 // Perform the Blit operations for the Blur effect.
                 using (new ProfilingScope(cmd, new ProfilingSampler(profilerTag)))
                 {
-                    Blit(cmd, cameraTargetHandle, blurTexHandle, material, 0);
-                    Blit(cmd, blurTexHandle, cameraTargetHandle, material, 1);
+                    if(settings.blurType.value == BlurType.Gaussian)
+                    {
+                        Blit(cmd, cameraTargetHandle, blurTexHandle, material, 0);
+                        Blit(cmd, blurTexHandle, cameraTargetHandle, material, 1);
+                    }
+                    else if(settings.blurType.value == BlurType.Box)
+                    {
+                        Blit(cmd, cameraTargetHandle, blurTexHandle, material, 2);
+                        Blit(cmd, blurTexHandle, cameraTargetHandle, material, 3);
+                    }
                 }
 
                 context.ExecuteCommandBuffer(cmd);
