@@ -140,13 +140,16 @@
             {
                 var settings = VolumeManager.instance.stack.GetComponent<BlurSettings>();
 
-                if (settings.blurType.value == BlurType.Gaussian)
+                if (settings.strength.value > settings.blurStepSize.value * 2)
                 {
-                    Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 0);
-                }
-                else if (settings.blurType.value == BlurType.Box)
-                {
-                    Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 2);
+                    if (settings.blurType.value == BlurType.Gaussian)
+                    {
+                        Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 0);
+                    }
+                    else if (settings.blurType.value == BlurType.Box)
+                    {
+                        Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 2);
+                    }
                 }
             }
 
@@ -154,17 +157,21 @@
             {
                 var settings = VolumeManager.instance.stack.GetComponent<BlurSettings>();
 
-                // Set Blur effect properties.
-                material.SetInt("_KernelSize", settings.strength.value);
-                material.SetFloat("_Spread", settings.strength.value / 7.5f);
+                if (settings.strength.value > settings.blurStepSize.value * 2)
+                {
+                    // Set Blur effect properties.
+                    material.SetInt("_KernelSize", settings.strength.value);
+                    material.SetFloat("_Spread", settings.strength.value / 7.5f);
+                    material.SetInt("_BlurStepSize", settings.blurStepSize.value);
 
-                if(settings.blurType.value == BlurType.Gaussian)
-                {
-                    Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 1);
-                }
-                else if (settings.blurType.value == BlurType.Box)
-                {
-                    Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 3);
+                    if(settings.blurType.value == BlurType.Gaussian)
+                    {
+                        Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 1);
+                    }
+                    else if (settings.blurType.value == BlurType.Box)
+                    {
+                        Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 3);
+                    }
                 }
             }
 
