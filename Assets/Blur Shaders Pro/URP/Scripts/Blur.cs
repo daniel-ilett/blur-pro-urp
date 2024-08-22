@@ -90,21 +90,25 @@
                 var settings = VolumeManager.instance.stack.GetComponent<BlurSettings>();
                 material.SetInt("_KernelSize", settings.strength.value);
                 material.SetFloat("_Spread", settings.strength.value / 7.5f);
+                material.SetInt("_BlurStepSize", settings.blurStepSize.value);
 
                 RTHandle cameraTargetHandle = renderingData.cameraData.renderer.cameraColorTargetHandle;
 
-                // Perform the Blit operations for the Blur effect.
-                using (new ProfilingScope(cmd, profilingSampler))
+                if (settings.strength.value > settings.blurStepSize.value * 2)
                 {
-                    if(settings.blurType.value == BlurType.Gaussian)
+                    // Perform the Blit operations for the Blur effect.
+                    using (new ProfilingScope(cmd, profilingSampler))
                     {
-                        Blit(cmd, cameraTargetHandle, blurTexHandle, material, 0);
-                        Blit(cmd, blurTexHandle, cameraTargetHandle, material, 1);
-                    }
-                    else if(settings.blurType.value == BlurType.Box)
-                    {
-                        Blit(cmd, cameraTargetHandle, blurTexHandle, material, 2);
-                        Blit(cmd, blurTexHandle, cameraTargetHandle, material, 3);
+                        if (settings.blurType.value == BlurType.Gaussian)
+                        {
+                            Blit(cmd, cameraTargetHandle, blurTexHandle, material, 0);
+                            Blit(cmd, blurTexHandle, cameraTargetHandle, material, 1);
+                        }
+                        else if (settings.blurType.value == BlurType.Box)
+                        {
+                            Blit(cmd, cameraTargetHandle, blurTexHandle, material, 2);
+                            Blit(cmd, blurTexHandle, cameraTargetHandle, material, 3);
+                        }
                     }
                 }
 

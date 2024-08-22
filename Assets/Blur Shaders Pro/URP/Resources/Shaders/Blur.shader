@@ -20,6 +20,7 @@
 #endif
 		uint _KernelSize;
 		float _Spread;
+		uint _BlurStepSize;
 
 		float gaussian(int x) 
 		{
@@ -47,7 +48,7 @@
 
 				float2 uv;
 
-				for (int x = lower; x <= upper; ++x)
+				for (int x = lower; x <= upper; x += _BlurStepSize)
 				{
 					float gauss = gaussian(x);
 					kernelSum += gauss;
@@ -80,7 +81,7 @@
 
 				float2 uv;
 
-				for (int y = lower; y <= upper; ++y)
+				for (int y = lower; y <= upper; y += _BlurStepSize)
 				{
 					float gauss = gaussian(y);
 					kernelSum += gauss;

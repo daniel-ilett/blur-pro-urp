@@ -13,6 +13,9 @@
         [Tooltip("Blur Strength")]
         public ClampedIntParameter strength = new ClampedIntParameter(1, 1, 500);
 
+        [Tooltip("Higher values will skip pixels during blur passes. Increase for better performance.")]
+        public ClampedIntParameter blurStepSize = new ClampedIntParameter(1, 1, 16);
+
         [Tooltip("Type of blur. Gaussian blur is slightly more expensive, but higher fidelity.")]
         public BlurTypeParameter blurType = new BlurTypeParameter(BlurType.Gaussian);
 
