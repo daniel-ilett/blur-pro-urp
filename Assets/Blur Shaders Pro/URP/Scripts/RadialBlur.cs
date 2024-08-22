@@ -79,6 +79,11 @@
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
+                if (renderingData.cameraData.isPreviewCamera)
+                {
+                    return;
+                }
+
                 if (material == null)
                 {
                     CreateMaterial();
