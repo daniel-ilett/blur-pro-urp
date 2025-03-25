@@ -1,10 +1,13 @@
-﻿namespace BlurShadersPro.URP
-{
-    using UnityEngine;
-    using UnityEditor;
-    using UnityEngine.Rendering;
-    using UnityEngine.Rendering.Universal;
+﻿using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
+#if UNITY_6000_0_OR_NEWER
+    using UnityEngine.Rendering.RenderGraphModule;
+#endif
+
+namespace BlurShadersPro.URP
+{
     public class Blur : ScriptableRendererFeature
     {
         BlurRenderPass pass;
