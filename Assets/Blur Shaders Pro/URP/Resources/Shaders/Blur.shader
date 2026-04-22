@@ -25,7 +25,7 @@
 		float gaussian(int x) 
 		{
 			float sigmaSqu = _Spread * _Spread;
-			return (1 / sqrt(TWO_PI * sigmaSqu)) * pow(E, -(x * x) / (2 * sigmaSqu));
+			return (rsqrt(TWO_PI * sigmaSqu)) * pow(E, -(x * x) / (2 * sigmaSqu));
 		}
 
 		ENDHLSL

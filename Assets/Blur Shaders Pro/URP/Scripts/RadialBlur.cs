@@ -123,7 +123,6 @@ namespace BlurShadersPro.URP
 
             private class CopyPassData
             {
-                public Material material;
                 public TextureHandle inputTexture;
             }
 
@@ -133,44 +132,31 @@ namespace BlurShadersPro.URP
                 public TextureHandle inputTexture;
             }
 
-            private static void ExecuteCopyPass(RasterCommandBuffer cmd, RTHandle source, Material material)
+            private static void ExecuteCopyPass(RasterCommandBuffer cmd, RTHandle source)
             {
-                var settings = VolumeManager.instance.stack.GetComponent<BlurSettings>();
-
-                if (settings.blurType.value == BlurType.Gaussian)
-                {
-                    Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 0);
-                }
-                else if (settings.blurType.value == BlurType.Box)
-                {
-                    Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 2);
-                }
+                Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), 0.0f, false);
             }
 
             private static void ExecuteMainPass(RasterCommandBuffer cmd, RTHandle source, Material material)
             {
-                var settings = VolumeManager.instance.stack.GetComponent<BlurSettings>();
+                // Set Radial Blur effect properties.
+                var settings = VolumeManager.instance.stack.GetComponent<RadialBlurSettings>();
 
-                // Set Blur effect properties.
                 material.SetInt("_KernelSize", settings.strength.value);
                 material.SetFloat("_Spread", settings.strength.value / 7.5f);
+                material.SetFloat("_StepSize", settings.stepSize.value / 1000.0f);
 
-                if(settings.blurType.value == BlurType.Gaussian)
-                {
-                    Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 1);
-                }
-                else if (settings.blurType.value == BlurType.Box)
-                {
-                    Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 3);
-                }
+                Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 0);
             }
 
             public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
             {
-                if(material == null)
+                if (material == null)
                 {
                     CreateMaterial();
                 }
+
+                var settings = VolumeManager.instance.stack.GetComponent<RadialBlurSettings>();
 
                 UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
                 UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
@@ -180,20 +166,19 @@ namespace BlurShadersPro.URP
                 TextureHandle copiedColor = TextureHandle.nullHandle;
 
                 // Perform the intermediate copy pass (source -> temp).
-                copiedColor = UniversalRenderer.CreateRenderGraphTexture(renderGraph, colorCopyDescriptor, "_BlurColorCopy", false);
+                copiedColor = UniversalRenderer.CreateRenderGraphTexture(renderGraph, colorCopyDescriptor, "_RadialBlurColorCopy", false);
 
-                using (var builder = renderGraph.AddRasterRenderPass<CopyPassData>("Blur_CopyColor", out var passData, profilingSampler))
+                using (var builder = renderGraph.AddRasterRenderPass<CopyPassData>("RadialBlur_CopyColor", out var passData, profilingSampler))
                 {
-                    passData.material = material;
                     passData.inputTexture = resourceData.activeColorTexture;
 
                     builder.UseTexture(resourceData.activeColorTexture, AccessFlags.Read);
                     builder.SetRenderAttachment(copiedColor, 0, AccessFlags.Write);
-                    builder.SetRenderFunc((CopyPassData data, RasterGraphContext context) => ExecuteCopyPass(context.cmd, data.inputTexture, data.material));
+                    builder.SetRenderFunc((CopyPassData data, RasterGraphContext context) => ExecuteCopyPass(context.cmd, data.inputTexture));
                 }
 
                 // Perform main pass (temp -> source).
-                using (var builder = renderGraph.AddRasterRenderPass<MainPassData>("Blur_MainPass", out var passData, profilingSampler))
+                using (var builder = renderGraph.AddRasterRenderPass<MainPassData>("RadialBlur_MainPass", out var passData, profilingSampler))
                 {
                     passData.material = material;
                     passData.inputTexture = copiedColor;

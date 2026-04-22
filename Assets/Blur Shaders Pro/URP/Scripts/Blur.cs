@@ -96,14 +96,15 @@ namespace BlurShadersPro.URP
 
                 // Set Blur effect properties.
                 var settings = VolumeManager.instance.stack.GetComponent<BlurSettings>();
-                material.SetInt("_KernelSize", settings.strength.value);
-                material.SetFloat("_Spread", settings.strength.value / 7.5f);
-                material.SetInt("_BlurStepSize", settings.blurStepSize.value);
 
                 RTHandle cameraTargetHandle = renderingData.cameraData.renderer.cameraColorTargetHandle;
 
                 if (settings.strength.value > settings.blurStepSize.value * 2)
                 {
+                    material.SetInt("_KernelSize", settings.strength.value);
+                    material.SetFloat("_Spread", settings.strength.value / 7.5f);
+                    material.SetInt("_BlurStepSize", settings.blurStepSize.value);
+
                     // Perform the Blit operations for the Blur effect.
                     using (new ProfilingScope(cmd, profilingSampler))
                     {
@@ -132,24 +133,29 @@ namespace BlurShadersPro.URP
 
 #if UNITY_6000_0_OR_NEWER
 
-            private class CopyPassData
+            private class HorizontalPassData
             {
                 public Material material;
                 public TextureHandle inputTexture;
             }
 
-            private class MainPassData
+            private class VerticalPassData
             {
                 public Material material;
                 public TextureHandle inputTexture;
             }
 
-            private static void ExecuteCopyPass(RasterCommandBuffer cmd, RTHandle source, Material material)
+            private static void ExecuteHorizontalPass(RasterCommandBuffer cmd, RTHandle source, Material material)
             {
                 var settings = VolumeManager.instance.stack.GetComponent<BlurSettings>();
 
                 if (settings.strength.value > settings.blurStepSize.value * 2)
                 {
+                    // Set Blur effect properties.
+                    material.SetInt("_KernelSize", settings.strength.value);
+                    material.SetFloat("_Spread", settings.strength.value / 7.5f);
+                    material.SetInt("_BlurStepSize", settings.blurStepSize.value);
+
                     if (settings.blurType.value == BlurType.Gaussian)
                     {
                         Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 0);
@@ -161,17 +167,12 @@ namespace BlurShadersPro.URP
                 }
             }
 
-            private static void ExecuteMainPass(RasterCommandBuffer cmd, RTHandle source, Material material)
+            private static void ExecuteVerticalPass(RasterCommandBuffer cmd, RTHandle source, Material material)
             {
                 var settings = VolumeManager.instance.stack.GetComponent<BlurSettings>();
 
                 if (settings.strength.value > settings.blurStepSize.value * 2)
                 {
-                    // Set Blur effect properties.
-                    material.SetInt("_KernelSize", settings.strength.value);
-                    material.SetFloat("_Spread", settings.strength.value / 7.5f);
-                    material.SetInt("_BlurStepSize", settings.blurStepSize.value);
-
                     if(settings.blurType.value == BlurType.Gaussian)
                     {
                         Blitter.BlitTexture(cmd, source, new Vector4(1, 1, 0, 0), material, 1);
@@ -197,28 +198,28 @@ namespace BlurShadersPro.URP
                 var colorCopyDescriptor = GetCopyPassDescriptor(cameraData.cameraTargetDescriptor);
                 TextureHandle copiedColor = TextureHandle.nullHandle;
 
-                // Perform the intermediate copy pass (source -> temp).
                 copiedColor = UniversalRenderer.CreateRenderGraphTexture(renderGraph, colorCopyDescriptor, "_BlurColorCopy", false);
 
-                using (var builder = renderGraph.AddRasterRenderPass<CopyPassData>("Blur_CopyColor", out var passData, profilingSampler))
+                // Perform the horizontal blur pass (source -> temp).
+                using (var builder = renderGraph.AddRasterRenderPass<HorizontalPassData>("Blur_Horizontal", out var passData, profilingSampler))
                 {
                     passData.material = material;
                     passData.inputTexture = resourceData.activeColorTexture;
 
                     builder.UseTexture(resourceData.activeColorTexture, AccessFlags.Read);
                     builder.SetRenderAttachment(copiedColor, 0, AccessFlags.Write);
-                    builder.SetRenderFunc((CopyPassData data, RasterGraphContext context) => ExecuteCopyPass(context.cmd, data.inputTexture, data.material));
+                    builder.SetRenderFunc((HorizontalPassData data, RasterGraphContext context) => ExecuteHorizontalPass(context.cmd, data.inputTexture, data.material));
                 }
 
-                // Perform main pass (temp -> source).
-                using (var builder = renderGraph.AddRasterRenderPass<MainPassData>("Blur_MainPass", out var passData, profilingSampler))
+                // Perform the vertical blur pass (temp -> source).
+                using (var builder = renderGraph.AddRasterRenderPass<VerticalPassData>("Blur_Vertical", out var passData, profilingSampler))
                 {
                     passData.material = material;
                     passData.inputTexture = copiedColor;
 
                     builder.UseTexture(copiedColor, AccessFlags.Read);
                     builder.SetRenderAttachment(resourceData.activeColorTexture, 0, AccessFlags.Write);
-                    builder.SetRenderFunc((MainPassData data, RasterGraphContext context) => ExecuteMainPass(context.cmd, data.inputTexture, data.material));
+                    builder.SetRenderFunc((VerticalPassData data, RasterGraphContext context) => ExecuteVerticalPass(context.cmd, data.inputTexture, data.material));
                 }
             }
 

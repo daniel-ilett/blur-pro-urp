@@ -116,13 +116,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 602ad96208c480144986086bbdd06054, type: 3}
   m_Name: RadialBlurSettings
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   strength:
     m_OverrideState: 1
-    m_Value: 40
+    m_Value: 120
   stepSize:
     m_OverrideState: 1
-    m_Value: 3
+    m_Value: 1
 --- !u!114 &6884595819033463834
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -135,11 +135,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 586c063f0d599334c9b91fb9af9b1ab7, type: 3}
   m_Name: BlurSettings
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   renderPassEvent: 600
   strength:
     m_OverrideState: 1
-    m_Value: 120
+    m_Value: 68
+  blurStepSize:
+    m_OverrideState: 0
+    m_Value: 1
   blurType:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0
